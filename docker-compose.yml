@@ -54,6 +54,13 @@ services:
       MINIO_SECRET: minioadmin
     depends_on: [api, redis, minio]
 
+
+  whisper:
+    build: ./whisper_service
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./whisper_service:/app
 volumes:
   db_data:
   minio_data:

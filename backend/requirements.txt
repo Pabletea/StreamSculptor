@@ -7,3 +7,4 @@ python-multipart
 pydantic
 yt-dlp
 python-dotenv
+git+https://github.com/openai/whisper.git
