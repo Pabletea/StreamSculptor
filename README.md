@@ -10,14 +10,48 @@ StreamSculptor is a platform that automatically detects the best moments from a 
 ## Repository Structure
 
     backend/
-    ├── nice/
-    │   └── tree/
-    │       ├── diagram!
-    │       └── :)
-    ├── Use indentation
-    ├── to indicate/
-    │   ├── file
-    │   └── and
+    ├── app/
+    │   ├── services/
+    │   │   └── minio_client.py
+    │   ├── tasks/
+    │   │   └── process_vod.py
+    │   ├── celery_app.py
+    │   └── main.py
+    ├── Dockerfile
+    ├── requirements.txt
     ├── .gitignore
     ├── docker-compose.yml
     └── README.md
+
+## Local Setup
+
+1. Clone the repository:
+```bash
+    git clone <repo_url>
+    cd StreamSculptor
+```
+2. Start services with Docker Compose:
+```bash
+    docker-compose up --build
+```
+3.Access services
+- Backend : ```http://localhost:8000```
+- MinIO: ```http://localhost:9000```
+- Redis: ```localhost:6379```
+- Postgres: ```localhost:5432```
+---
+
+## Main Endpoints
+### Ingest
+- POST ```/ingest/upload/``` — Upload a VOD file or URL
+- POST ```/ingest/download/``` — Download and enqueue a VOD
+
+
+## Arquitecture Overview
+```css
+[VOD/File] --> [FastAPI ingest endpoint] --> [Celery Worker] --> 
+[FFmpeg: extract audio/video] --> [MinIO storage] --> 
+[ASR + Audio/Video Classification + Keypoint Detection] --> 
+[Score fusion] --> [Ranked clips] --> 
+[Text Generation + TTI for thumbnails] --> [Frontend review & publish]
+```
