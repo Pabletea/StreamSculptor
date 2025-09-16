@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+venv/
+.env/
+
+# VSCode
+.vscode/
+
+# Docker
+*.log
+docker-compose.override.yml
+
+# MinIO / storage
+minio_data/
+db_data/
+
+# Celery / logs
+celerybeat-schedule
+*.pid
+*.log
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Frontend (Next.js)
+node_modules/
+.next/
+out/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Misc
+*.zip
+*.tar.gz

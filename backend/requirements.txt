@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+celery[redis]
+redis
+minio
+python-multipart
+pydantic
+yt-dlp
+python-dotenv

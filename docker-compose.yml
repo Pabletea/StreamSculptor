@@ -1,0 +1,59 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: streams
+      POSTGRES_USER: streams
+      POSTGRES_PASSWORD: streamspass
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports: 
+      - "5432:5432"
+  
+  redis:
+    image: redis:7
+    ports: 
+      - "6379:6379"
+  
+  minio:
+    image: minio/minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data
+    ports:
+      - "9002:9000"   # API
+      - "9003:9001"   # WebUI
+    volumes:
+    - minio_data:/data
+    
+  api:
+    build: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: minio:9000
+      MINIO_KEY: minioadmin
+      MINIO_SECRET: minioadmin
+    depends_on: [db, redis, minio]
+
+  worker:
+    build: ./backend
+    command: celery -A app.celery_app.celery worker --loglevel=info -Q vod
+    volumes:
+      - ./backend:/app
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_KEY: minioadmin
+      MINIO_SECRET: minioadmin
+    depends_on: [api, redis, minio]
+
+volumes:
+  db_data:
+  minio_data:
