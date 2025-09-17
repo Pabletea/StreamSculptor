@@ -1,0 +1,17 @@
+# Ignorar directorios innecesarios
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar configuraciones locales
+.env
+*.log
+
+# Ignorar dependencias que se instalarán dentro del contenedor
+venv/
+.env/
+
+# Ignorar archivos de git
+.git
+.gitignore
