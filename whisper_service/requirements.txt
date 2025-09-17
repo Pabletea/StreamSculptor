@@ -3,3 +3,5 @@ uvicorn
 torch
 openai-whisper
 python-multipart
+minio
+pydantic
