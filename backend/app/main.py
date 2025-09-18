@@ -5,8 +5,8 @@ from pydantic import BaseModel
 from datetime import timedelta
 import uuid
 import json
-from app.tasks.process_vod import download_and_extract_audio, transcribe_vod_audio, process_vod_complete
-from app.tasks.analyze_audio import analyze_audio_segments, generate_clips_task, process_vod_with_clips
+from app.tasks.process_vod import download_and_extract_audio, transcribe_vod_audio, process_vod_complete, process_vod_with_clips
+from app.tasks.analyze_audio import analyze_audio_segments, generate_clips_task
 from app.services.minio_client import get_minio_client
 from app.services.whisper_client import transcribe_audio, transcribe_audio_from_minio
 from app.models.clip_models import GenerateClipsRequest, ClipsResponse, AudioAnalysisResponse

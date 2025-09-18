@@ -121,3 +121,68 @@ def process_vod_complete(self, job_id: str, source_url: str, user_id: int | None
     except Exception as e:
         LOG.exception(f"Complete VOD processing failed for job {job_id}: {e}")
         raise
+
+@celery.task(name="app.tasks.process_vod.process_vod_with_clips",bind=True) 
+def process_vod_with_clips(
+    self, 
+    job_id: str, 
+    source_url: str, 
+    user_id: int | None = None,
+    max_clips: int = 10
+):
+    """Pipeline completo: descarga + transcribe + análisis + clips"""
+    try:
+        LOG.info(f"Starting complete VOD processing with clips for job {job_id}")
+        
+        # Importar tareas directamente
+        from app.tasks.process_vod import download_and_extract_audio, transcribe_vod_audio
+        from app.tasks.analyze_audio import analyze_audio_segments, generate_clips_task
+        
+        # 1. Descargar y extraer audio - EJECUTAR SINCRONO
+        LOG.info(f"Step 1/4: Downloading and extracting audio for {job_id}")
+        download_result = download_and_extract_audio(job_id, source_url, user_id)
+        LOG.info(f"Download completed: {download_result}")
+        
+        # 2. Transcribir audio - EJECUTAR SINCRONO
+        LOG.info(f"Step 2/4: Transcribing audio for {job_id}")
+        transcript_result = transcribe_vod_audio(job_id)
+        LOG.info(f"Transcription completed: {transcript_result}")
+        
+        # 3. Analizar audio - EJECUTAR SINCRONO
+        LOG.info(f"Step 3/4: Analyzing audio segments for {job_id}")
+        analysis_result = analyze_audio_segments(job_id)
+        LOG.info(f"Analysis completed: {len(analysis_result.get('segments', []))} segments found")
+        
+        # 4. Generar clips - EJECUTAR SINCRONO
+        LOG.info(f"Step 4/4: Generating clips for {job_id}")
+        clips_result = generate_clips_task(job_id, max_clips)
+        LOG.info(f"Clips generation completed: {clips_result.get('clips_generated', 0)} clips")
+        
+        # Resultado completo
+        final_result = {
+            "job_id": job_id,
+            "status": "completed",
+            "pipeline_steps": {
+                "download": download_result,
+                "transcription": transcript_result,
+                "analysis": analysis_result,
+                "clips": clips_result
+            },
+            "summary": {
+                "clips_generated": clips_result.get('clips_generated', 0),
+                "total_size_mb": clips_result.get('total_size_mb', 0),
+                "processing_time": clips_result.get('generation_time', 0)
+            }
+        }
+        
+        LOG.info(f"Complete VOD processing finished for {job_id}")
+        return final_result
+        
+    except Exception as e:
+        LOG.exception(f"Complete VOD processing with clips failed for job {job_id}: {e}")
+        # Actualizar estado en caso de error
+        self.update_state(
+            state='FAILURE',
+            meta={'error': str(e), 'job_id': job_id}
+        )
+        raise
