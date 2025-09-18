@@ -9,3 +9,6 @@ yt-dlp
 python-dotenv
 openai
 requests
+librosa
+numpy
+soundfile
