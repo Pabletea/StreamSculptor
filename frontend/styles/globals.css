@@ -5,10 +5,29 @@
 @tailwind utilities;
 
 @layer base {
-  body {
-    @apply bg-background text-text-main font-sans;
+  :root {
+    /* --- Tema Claro (Valores por defecto) --- */
+    --background: 240 10% 99%;      /* #FCFCFD */
+    --surface: 240 5% 96%;          /* #F3F4F6 */
+    --primary: 259 100% 64%;        /* #7E42FF */
+    --primary-hover: 256 100% 71%;  /* #905EFF */
+    --secondary: 240 5% 90%;        /* #E5E7EB */
+    --text-main: 240 10% 3.9%;      /* #111827 */
+    --text-secondary: 240 4% 46%;   /* #6B7280 */
   }
-  .dark body {
-    @apply bg-white text-gray-900;
+
+  .dark {
+    /* --- Tema Oscuro --- */
+    --background: 240 10% 3.9%;     /* #0A090C */
+    --surface: 240 5% 8%;           /* #131217 */
+    --primary: 259 100% 64%;        /* #7E42FF */
+    --primary-hover: 256 100% 71%;  /* #905EFF */
+    --secondary: 240 4% 16%;        /* #2A292F */
+    --text-main: 240 5% 95%;        /* #F0F0F0 */
+    --text-secondary: 240 4% 63%;   /* #A0A0A0 */
   }
+}
+
+body {
+  @apply bg-background text-text-main font-sans transition-colors duration-300;
 }
