@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import '../styles/globals.css'
+import { ThemeProvider } from 'next-themes'
 
 export default function App({ Component, pageProps }) {
   const [theme, setTheme] = useState('dark')
@@ -15,14 +16,8 @@ export default function App({ Component, pageProps }) {
   }, [theme])
 
   return (
-    <div>
-      <button 
-        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className="fixed top-4 right-4 p-2 bg-secondary rounded-lg"
-      >
-        {theme === 'dark' ? '🌙' : '🌞'}
-      </button>
+    <ThemeProvider attribute="class">
       <Component {...pageProps} />
-    </div>
+    </ThemeProvider>
   )
 }
