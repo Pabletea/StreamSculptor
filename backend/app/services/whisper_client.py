@@ -25,7 +25,7 @@ def transcribe_audio_from_minio(bucket: str, object_name: str):
         response = requests.post(
             f"{WHISPER_URL}/transcribe-from-minio", 
             json=payload,
-            timeout=300  # 5 minutos timeout para transcripciones largas
+            timeout=1200  # 5 minutos timeout para transcripciones largas
         )
         
         response.raise_for_status()

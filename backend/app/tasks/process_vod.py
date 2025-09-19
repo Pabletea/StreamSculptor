@@ -19,7 +19,7 @@ def download_and_extract_audio(self, job_id: str, source_url: str, user_id: int 
 
     # 1) Download with yt-dlp
     try:
-        cmd_dl = ["yt-dlp", "-f", "best", "-o", str(video_path), source_url]
+        cmd_dl = ["yt-dlp", "-f", "bestvideo+bestaudio", "-o", str(video_path), source_url]
         LOG.info("Running: %s", " ".join(cmd_dl))
         subprocess.run(cmd_dl, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError as e:
