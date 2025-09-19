@@ -4,6 +4,7 @@ from pathlib import Path
 from app.celery_app import celery
 from app.services.minio_client import get_minio_client
 from app.services.whisper_client import transcribe_audio_from_minio
+from app.utils.sanitize_for_json import sanitize_for_json
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -176,7 +177,7 @@ def process_vod_with_clips(
         }
         
         LOG.info(f"Complete VOD processing finished for {job_id}")
-        return final_result
+        return sanitize_for_json(final_result)
         
     except Exception as e:
         LOG.exception(f"Complete VOD processing with clips failed for job {job_id}: {e}")

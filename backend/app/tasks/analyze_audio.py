@@ -3,6 +3,7 @@ from app.services.audio_analyzer import AudioAnalyzer
 from app.services.clip_generator import ClipGenerator
 from app.services.srt_generator import SRTGenerator
 from app.services.minio_client import get_minio_client
+from app.utils.sanitize_for_json import sanitize_for_json
 import logging
 import json
 import tempfile
@@ -80,7 +81,7 @@ def analyze_audio_segments(
             os.unlink(temp_file_path)
         
         LOG.info(f"Audio analysis completed for {job_id}: {len(top_segments)} segments")
-        return analysis_result
+        return  sanitize_for_json(analysis_result)
         
     except Exception as e:
         LOG.exception(f"Audio analysis failed for job {job_id}: {e}")
@@ -150,7 +151,7 @@ def generate_clips_task(self, job_id: str, max_clips: int = 10):
         }
         
         LOG.info(f"Clip generation completed for {job_id}: {len(clips_metadata)} clips")
-        return result
+        return sanitize_for_json(result)
         
     except Exception as e:
         LOG.exception(f"Clip generation failed for job {job_id}: {e}")
