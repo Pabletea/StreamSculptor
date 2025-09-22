@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import Layout from '../components/Layout';
+import Layout from '../../components/Layout';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
 
@@ -79,7 +79,7 @@ export default function Dashboard() {
           {/* Header */}
           <div className="text-left mb-12">
             <h1 className="text-5xl font-extrabold text-text-main">
-              Stream<span className="text-primary">Sculptor</span>
+              Generate Clips
             </h1>
             <p className="text-xl text-text-secondary mt-2">
               AI-powered video clipping. Effortless highlights.
@@ -95,7 +95,7 @@ export default function Dashboard() {
             <div className="space-y-4 mb-6">
               <input
                 type="text"
-                placeholder="Paste a YouTube or Twitch URL here..."
+                placeholder="Paste a YouTube or Twitch URL..."
                 value={sourceUrl}
                 onChange={(e) => setSourceUrl(e.target.value)}
                 className="w-full px-5 py-4 bg-background border border-secondary rounded-lg text-text-main placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300 shadow-sm focus:shadow-glow"
@@ -172,7 +172,7 @@ export default function Dashboard() {
                   <h3 className="font-bold text-text-main mb-4">How It Works</h3>
                   <div className="space-y-3">
                       {[
-                          { icon: '📥', title: 'Download & Transcribe' },
+                          { icon: '📥', title: 'Download and process' },
                           { icon: '✨', title: 'AI-Powered Analysis' },
                           { icon: '✂️', title: 'Clip Generation' },
                       ].map(feature => (

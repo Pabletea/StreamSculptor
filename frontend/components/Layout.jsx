@@ -70,7 +70,7 @@ export default function Layout({ children }) {
                     <div className="flex justify-between items-center h-16">
                         {/* Parte Izquierda: Logo y Menú de Herramientas */}
                         <div className="flex items-center gap-8">
-                            <Link href="/dashboard" className="text-2xl font-extrabold text-text-main">
+                            <Link href="/tools/dashboard" className="text-2xl font-extrabold text-text-main">
                                 Stream<span className="text-primary">Sculptor</span>
                             </Link>
                             {/* Menú Desplegable de Herramientas */}
@@ -84,9 +84,9 @@ export default function Layout({ children }) {
                                 </button>
                                 {toolsOpen && (
                                     <div className="absolute mt-2 w-48 bg-surface border border-secondary rounded-lg shadow-lg py-2">
-                                        <Link href="/dashboard" className="block px-4 py-2 text-sm text-text-secondary hover:bg-secondary hover:text-text-main">Generate Clips</Link>
-                                        <a href="#" className="block px-4 py-2 text-sm text-text-secondary hover:bg-secondary hover:text-text-main">Transcribe Video</a>
-                                        <a href="#" className="block px-4 py-2 text-sm text-text-secondary hover:bg-secondary hover:text-text-main">Generate Subtitles</a>
+                                        <Link href="/tools/dashboard" className="block px-4 py-2 text-sm text-text-secondary hover:bg-secondary hover:text-text-main">Generate Clips</Link>
+                                        <Link href="/tools/transcribe" className="block px-4 py-2 text-sm text-text-secondary hover:bg-secondary hover:text-text-main">Transcribe Video</Link>
+                                        <Link href="/tools/subtitle" className="block px-4 py-2 text-sm text-text-secondary hover:bg-secondary hover:text-text-main">Subtitle Video</Link>
                                     </div>
                                 )}
                             </div>
@@ -135,6 +135,12 @@ export default function Layout({ children }) {
             <main>
                 {children}
             </main>
+            <footer className="bg-surface border-t border-secondary mt-8 py-4">
+                <div className="container mx-auto px-4 text-center text-sm text-text-secondary">
+                    © {new Date().getFullYear()} StreamSculptor. Todos los derechos reservados.
+                </div>
+            </footer>
         </div>
+
     );
 }
