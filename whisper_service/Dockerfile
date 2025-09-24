@@ -14,6 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5000
+# Railway usa la variable $PORT dinámicamente
+EXPOSE $PORT
 
-CMD ["uvicorn", "service:app", "--host", "0.0.0.0", "--port", "5000"]
+# Usar la variable $PORT de Railway
+CMD ["sh", "-c", "uvicorn service:app --host 0.0.0.0 --port $PORT"]

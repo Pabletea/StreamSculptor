@@ -3,14 +3,16 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copiamos dependencias primero
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json* ./
 
-# Instalamos dependencias de forma limpia (respeta el lockfile)
+# Instalamos dependencias
 RUN npm ci --legacy-peer-deps
 
-# Copiamos el resto del código (excluyendo node_modules)
+# Copiamos el resto del código
 COPY . .
 
-EXPOSE 3000
+# Railway usa la variable $PORT dinámicamente
+EXPOSE $PORT
 
-CMD ["npm", "run", "dev"]
+# Para desarrollo en Railway
+CMD ["sh", "-c", "npm run dev -- --port $PORT --host 0.0.0.0"]
