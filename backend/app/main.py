@@ -77,14 +77,14 @@ def process_vod_with_clips_endpoint(req: ProcessVODWithClipsRequest):
     """Pipeline completo: descarga + transcribe + análisis + clips"""
     job_id = str(uuid.uuid4())
     task = process_vod_with_clips.delay(
-        job_id, 
-        req.source_url, 
-        req.user_id, 
+        job_id,
+        req.source_url,
+        req.user_id,
         req.max_clips
     )
     return {
-        "job_id": job_id, 
-        "task_id": task.id, 
+        "job_id": job_id,
+        "task_id": task.id,
         "status": "processing",
         "message": "Full pipeline started: download → transcribe → analyze → generate clips"
     }
@@ -101,7 +101,7 @@ def get_audio_analysis(job_id: str):
     client = get_minio_client()
     bucket = "vods"
     analysis_object = f"{job_id}/audio_analysis.json"
-    
+
     try:
         data = client.get_object(bucket, analysis_object)
         analysis = json.loads(data.read().decode('utf-8'))
@@ -114,8 +114,8 @@ def generate_clips_endpoint(req: GenerateClipsRequest):
     """Generar clips basados en análisis de audio"""
     task = generate_clips_task.delay(req.job_id, req.max_clips)
     return {
-        "job_id": req.job_id, 
-        "task_id": task.id, 
+        "job_id": req.job_id,
+        "task_id": task.id,
         "status": "generating_clips",
         "max_clips": req.max_clips
     }
@@ -126,7 +126,7 @@ def get_clips(job_id: str):
     client = get_minio_client()
     bucket = "vods"
     metadata_object = f"{job_id}/clips_metadata.json"
-    
+
     try:
         data = client.get_object(bucket, metadata_object)
         clips_data = json.loads(data.read().decode('utf-8'))
@@ -140,11 +140,11 @@ def download_clip(job_id: str, clip_index: int):
     client = get_minio_client()
     bucket = "vods"
     clip_object = f"{job_id}/clips/clip_{clip_index:02d}.mp4"
-    
+
     try:
         data = client.get_object(bucket, clip_object)
         filename = f"clip_{clip_index}_{job_id}.mp4"
-        
+
         return StreamingResponse(
             data,
             media_type="video/mp4",
@@ -159,11 +159,11 @@ def download_srt(job_id: str, clip_index: int):
     client = get_minio_client()
     bucket = "vods"
     srt_object = f"{job_id}/clips/clip_{clip_index:02d}.srt"
-    
+
     try:
         data = client.get_object(bucket, srt_object)
         filename = f"clip_{clip_index}_{job_id}.srt"
-        
+
         return StreamingResponse(
             data,
             media_type="application/x-subrip",
@@ -177,7 +177,7 @@ def get_clips_preview(job_id: str):
     """Vista previa de clips con metadata básica"""
     try:
         clips_data = get_clips(job_id)
-        
+
         preview = {
             "job_id": job_id,
             "total_clips": len(clips_data.get("clips", [])),
@@ -193,21 +193,19 @@ def get_clips_preview(job_id: str):
                 for clip in clips_data.get("clips", [])
             ]
         }
-        
+
         return preview
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-# ===============================
-# ENDPOINTS UTILITARIOS
-# ===============================
+# UTILS ENDPOINTS
 
 @app.get("/task/{task_id}")
 def get_task_status(task_id: str):
     """Obtener estado de una tarea Celery"""
     from app.celery_app import celery
     task = celery.AsyncResult(task_id)
-    
+
     if task.state == 'PENDING':
         response = {
             'state': task.state,
@@ -249,24 +247,24 @@ def list_job_files(job_id: str):
 def download_file(job_id: str, file_type: str):
     client = get_minio_client()
     bucket = "vods"
-    
+
     file_mapping = {
         "video": "input.mp4",
-        "audio": "audio.wav", 
+        "audio": "audio.wav",
         "transcript": "transcript.json",
         "analysis": "audio_analysis.json",
         "clips_metadata": "clips_metadata.json"
     }
-    
+
     if file_type not in file_mapping:
         raise HTTPException(status_code=400, detail="Invalid file type")
-    
+
     object_name = f"{job_id}/{file_mapping[file_type]}"
 
     try:
         data = client.get_object(bucket, object_name)
         filename = f"{file_type}_{job_id}.{file_mapping[file_type].split('.')[-1]}"
-        
+
         media_types = {
             "video": "video/mp4",
             "audio": "audio/wav",
@@ -274,7 +272,7 @@ def download_file(job_id: str, file_type: str):
             "analysis": "application/json",
             "clips_metadata": "application/json"
         }
-        
+
         return StreamingResponse(
             data,
             media_type=media_types.get(file_type, "application/octet-stream"),
@@ -289,7 +287,7 @@ def get_transcript(job_id: str):
     client = get_minio_client()
     bucket = "vods"
     object_name = f"{job_id}/transcript.json"
-    
+
     try:
         data = client.get_object(bucket, object_name)
         transcript_data = json.loads(data.read().decode('utf-8'))

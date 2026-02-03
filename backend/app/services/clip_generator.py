@@ -72,16 +72,16 @@ class ClipGenerator:
         
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_clip:
             try:
-                # Comando ffmpeg para extraer clip
+
                 cmd = [
                     "ffmpeg", "-y",
                     "-i", video_path,
-                    "-ss", str(segment.start_time),          # Tiempo de inicio
-                    "-t", str(segment.duration),             # Duración
-                    "-c:v", "libx264",                       # Codec video
-                    "-c:a", "aac",                           # Codec audio
-                    "-preset", "fast",                       # Preset rápido
-                    "-crf", "23",                            # Calidad
+                    "-ss", str(segment.start_time),
+                    "-t", str(segment.duration),
+                    "-c:v", "libx264",
+                    "-c:a", "aac",
+                    "-preset", "fast",
+                    "-crf", "23",
                     temp_clip.name
                 ]
                 

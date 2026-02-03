@@ -23,8 +23,8 @@ class AudioAnalyzer:
     """Analizador de audio para detectar segmentos con alta energía"""
     
     def __init__(self, window_size: float = 30.0, step_size: float = 10.0):
-        self.window_size = window_size  # Ventana de 30s
-        self.step_size = step_size      # Paso de 10s (overlap de 20s)
+        self.window_size = window_size
+        self.step_size = step_size
         
     def analyze_audio_from_minio(self, bucket: str, audio_object: str) -> List[AudioSegment]:
         """Analiza audio desde MinIO y devuelve segmentos con scores"""
@@ -41,18 +41,18 @@ class AudioAnalyzer:
                 temp_file.flush()
                 temp_file_path = temp_file.name
                 
-                # Cargar audio con librosa
+
                 LOG.info("Loading audio with librosa...")
                 y, sr = librosa.load(temp_file_path, sr=None)
                 
-                # Generar segmentos
+
                 segments = self._create_sliding_windows(y, sr)
                 
                 LOG.info(f"Generated {len(segments)} audio segments")
                 return segments
                 
             finally:
-                # Cleanup
+
                 if os.path.exists(temp_file_path):
                     os.unlink(temp_file_path)
     
@@ -60,23 +60,22 @@ class AudioAnalyzer:
         """Crea ventanas deslizantes y calcula métricas"""
         segments = []
         
-        # Convertir tiempo a samples
+
         window_samples = int(self.window_size * sr)
         step_samples = int(self.step_size * sr)
         
-        # Iterar sobre ventanas
+
         for start_sample in range(0, len(y) - window_samples + 1, step_samples):
             end_sample = start_sample + window_samples
             
-            # Extraer segmento
+
             segment_audio = y[start_sample:end_sample]
-            
-            # Calcular tiempos
+
             start_time = start_sample / sr
             end_time = end_sample / sr
             duration = self.window_size
             
-            # Calcular métricas de audio
+
             rms_score = self._calculate_rms(segment_audio)
             peak_amplitude = np.max(np.abs(segment_audio))
             spectral_centroid = self._calculate_spectral_centroid(segment_audio, sr)
@@ -118,14 +117,13 @@ class AudioAnalyzer:
     
     def rank_segments_by_energy(self, segments: List[AudioSegment], top_n: int = 10) -> List[AudioSegment]:
         """Rankea segmentos por energía y devuelve los top N"""
-        # Score compuesto: RMS (70%) + Peak (20%) + Spectral Centroid (10%)
+
         for segment in segments:
             segment.composite_score = (
                 0.7 * segment.rms_score + 
                 0.2 * segment.peak_amplitude + 
-                0.1 * (segment.spectral_centroid / 5000)  # Normalizar aprox
+                0.1 * (segment.spectral_centroid / 5000) 
             )
         
-        # Ordenar por score descendente
         ranked = sorted(segments, key=lambda x: x.composite_score, reverse=True)
         return ranked[:top_n]
