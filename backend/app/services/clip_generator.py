@@ -86,8 +86,11 @@ class ClipGenerator:
                 ]
                 
                 LOG.info(f"Creating clip {clip_index}: {segment.start_time:.1f}s-{segment.end_time:.1f}s")
-                subprocess.run(cmd, check=True, capture_output=True)
-                
+                proc = subprocess.run(cmd, capture_output=True, text=True)
+                if proc.returncode != 0:
+                    LOG.error("FFmpeg failed for clip %s: returncode=%s stdout=%s stderr=%s", clip_index, proc.returncode, proc.stdout, proc.stderr)
+                    raise RuntimeError(f"Failed to generate clip {clip_index}: returncode={proc.returncode}; stderr={proc.stderr}")
+
                 # Subir clip a MinIO
                 client.fput_object(self.bucket, clip_object, temp_clip.name)
                 

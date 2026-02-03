@@ -1,4 +1,5 @@
 import os 
+import time
 import subprocess
 from pathlib import Path
 from app.celery_app import celery
@@ -17,23 +18,59 @@ def download_and_extract_audio(self, job_id: str, source_url: str, user_id: int 
     video_path = workdir / "input.mp4"
     audio_path = workdir / "audio.wav"
 
-    # 1) Download with yt-dlp
-    try:
+    # 1) Download with yt-dlp (retries + verification)
+    max_dl_attempts = 3
+    for attempt in range(1, max_dl_attempts + 1):
         cmd_dl = ["yt-dlp", "-f", "bestvideo+bestaudio", "-o", str(video_path), source_url]
-        LOG.info("Running: %s", " ".join(cmd_dl))
-        subprocess.run(cmd_dl, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except subprocess.CalledProcessError as e:
-        LOG.exception("yt-dlp failed: %s", e)
-        raise
+        LOG.info("Running: %s (attempt %d/%d)", " ".join(cmd_dl), attempt, max_dl_attempts)
+        proc_dl = subprocess.run(cmd_dl, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        # yt-dlp may append the real container/extension (e.g., input.mp4.webm). Check for that.
+        if proc_dl.returncode == 0:
+            if video_path.exists() and video_path.stat().st_size > 0:
+                LOG.info("Download succeeded: %s (%d bytes)", video_path, video_path.stat().st_size)
+                break
+            # Try to find a file with the expected prefix
+            matches = list(workdir.glob(video_path.name + '*'))
+            if matches:
+                actual = matches[0]
+                LOG.info("Found downloaded file with different suffix: %s -> renaming to %s", actual, video_path)
+                try:
+                    actual.rename(video_path)
+                except Exception:
+                    LOG.warning("Failed to rename %s to %s, will use original name %s", actual, video_path, actual)
+                    video_path = actual
+                else:
+                    LOG.info("Renamed downloaded file to expected path: %s", video_path)
+                if video_path.exists() and video_path.stat().st_size > 0:
+                    break
+        LOG.warning("yt-dlp attempt %d failed or produced no usable file: returncode=%s stdout=%s stderr=%s", attempt, proc_dl.returncode, proc_dl.stdout, proc_dl.stderr)
+        if attempt < max_dl_attempts:
+            time.sleep(2 ** attempt)
+    else:
+        LOG.error("yt-dlp failed after %d attempts: stdout=%s stderr=%s", max_dl_attempts, proc_dl.stdout, proc_dl.stderr)
+        raise RuntimeError(f"yt-dlp failed after {max_dl_attempts} attempts: {proc_dl.stderr}")
 
-    # 2) Extract audio with ffmpeg (WAV)
-    try:
+    # Verify downloaded file exists and is not empty
+    if not video_path.exists() or video_path.stat().st_size == 0:
+        LOG.error("Input video missing or empty after download: %s", video_path)
+        raise RuntimeError("Input video missing or empty after download")
+
+    # 2) Extract audio with ffmpeg (WAV) with a small retry
+    max_ff_attempts = 2
+    for attempt in range(1, max_ff_attempts + 1):
         cmd_ff = ["ffmpeg", "-y", "-i", str(video_path), "-vn", "-acodec", "pcm_s16le", "-ar", "44100", "-ac", "2", str(audio_path)]
-        LOG.info("Running: %s", " ".join(cmd_ff))
-        subprocess.run(cmd_ff, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except subprocess.CalledProcessError as e:
-        LOG.exception("ffmpeg failed: %s", e)
-        raise
+        LOG.info("Running: %s (attempt %d/%d)", " ".join(cmd_ff), attempt, max_ff_attempts)
+        LOG.info("Input video size before ffmpeg: %d bytes", video_path.stat().st_size)
+        proc_ff = subprocess.run(cmd_ff, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if proc_ff.returncode == 0 and audio_path.exists() and audio_path.stat().st_size > 0:
+            LOG.info("ffmpeg succeeded: %s (%d bytes)", audio_path, audio_path.stat().st_size)
+            break
+        LOG.warning("ffmpeg attempt %d failed: returncode=%s stdout=%s stderr=%s", attempt, proc_ff.returncode, proc_ff.stdout, proc_ff.stderr)
+        if attempt < max_ff_attempts:
+            time.sleep(2 ** attempt)
+    else:
+        LOG.error("ffmpeg failed after %d attempts: stdout=%s stderr=%s", max_ff_attempts, proc_ff.stdout, proc_ff.stderr)
+        raise RuntimeError(f"ffmpeg failed after {max_ff_attempts} attempts: {proc_ff.stderr}")
 
     # 3) Upload to MinIO
     client = get_minio_client()
@@ -134,6 +171,8 @@ def process_vod_with_clips(
     """Pipeline completo: descarga + transcribe + análisis + clips"""
     try:
         LOG.info(f"Starting complete VOD processing with clips for job {job_id}")
+        # Publish initial progress
+        self.update_state(state='PROGRESS', meta={'status': 'started', 'current': 0, 'total': 4, 'job_id': job_id})
         
         # Importar tareas directamente
         from app.tasks.process_vod import download_and_extract_audio, transcribe_vod_audio
@@ -141,21 +180,25 @@ def process_vod_with_clips(
         
         # 1. Descargar y extraer audio - EJECUTAR SINCRONO
         LOG.info(f"Step 1/4: Downloading and extracting audio for {job_id}")
+        self.update_state(state='PROGRESS', meta={'status': 'downloading', 'current': 1, 'total': 4, 'job_id': job_id})
         download_result = download_and_extract_audio(job_id, source_url, user_id)
         LOG.info(f"Download completed: {download_result}")
         
         # 2. Transcribir audio - EJECUTAR SINCRONO
         LOG.info(f"Step 2/4: Transcribing audio for {job_id}")
+        self.update_state(state='PROGRESS', meta={'status': 'transcribing', 'current': 2, 'total': 4, 'job_id': job_id})
         transcript_result = transcribe_vod_audio(job_id)
         LOG.info(f"Transcription completed: {transcript_result}")
         
         # 3. Analizar audio - EJECUTAR SINCRONO
         LOG.info(f"Step 3/4: Analyzing audio segments for {job_id}")
+        self.update_state(state='PROGRESS', meta={'status': 'analyzing', 'current': 3, 'total': 4, 'job_id': job_id})
         analysis_result = analyze_audio_segments(job_id)
         LOG.info(f"Analysis completed: {len(analysis_result.get('segments', []))} segments found")
         
         # 4. Generar clips - EJECUTAR SINCRONO
         LOG.info(f"Step 4/4: Generating clips for {job_id}")
+        self.update_state(state='PROGRESS', meta={'status': 'generating_clips', 'current': 4, 'total': 4, 'job_id': job_id})
         clips_result = generate_clips_task(job_id, max_clips)
         LOG.info(f"Clips generation completed: {clips_result.get('clips_generated', 0)} clips")
         
@@ -182,8 +225,14 @@ def process_vod_with_clips(
     except Exception as e:
         LOG.exception(f"Complete VOD processing with clips failed for job {job_id}: {e}")
         # Actualizar estado en caso de error
+        # Ensure the meta includes the exception type and message so backends can reconstruct the error
         self.update_state(
             state='FAILURE',
-            meta={'error': str(e), 'job_id': job_id}
+            meta={
+                'error': str(e),
+                'exc_type': type(e).__name__,
+                'exc_message': str(e),
+                'job_id': job_id
+            }
         )
         raise
