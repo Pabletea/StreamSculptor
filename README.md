@@ -39,4 +39,13 @@ StreamSculptor is a platform that automatically detects the best moments from a 
 [Text Generation + TTI for thumbnails] --> [Frontend review & publish]
 ```
 
+## Roadmap & Future Features
 
+- [ ] overlaying subtitles irl on generated clips
+- [ ] Thumbnail generation
+- [ ] Custom ML models trainable per content type (gaming, podcasts, tutorials, etc.)
+- [ ] Reduce video processing times through pipeline optimization
+- [ ] Cloud storage integrations (S3, Google Cloud, Azure)
+
+## Contributing
+We welcome contributions! Please check the roadmap above for features you'd like to help implement.
