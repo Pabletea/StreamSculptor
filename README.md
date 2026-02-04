@@ -11,10 +11,7 @@ StreamSculptor is a platform that automatically detects the best moments from a 
 ## Local Setup
 
 1. Clone the repository:
-```bash
-    git clone https://github.com/Pabletea/StreamSculptor.git
-    cd StreamSculptor
-```
+
 2. Start services with Docker Compose:
 ```bash
     docker-compose up --build
@@ -24,6 +21,7 @@ StreamSculptor is a platform that automatically detects the best moments from a 
 - MinIO: ```http://localhost:9000```
 - Redis: ```localhost:6379```
 - Postgres: ```localhost:5432```
+- Fronted / Web APP: ```localhost:`3000```
 ---
 
 ## Main Endpoints
