@@ -43,9 +43,7 @@ class ProcessVODWithClipsRequest(BaseModel):
 def health():
     return {"status": "ok"}
 
-# ===============================
-# ENDPOINTS ORIGINALES
-# ===============================
+
 
 @app.post("/ingest/download")
 def ingest_download(req: DownloadRequest):
@@ -68,9 +66,7 @@ def transcribe_from_minio_endpoint(req: TranscribeMinIORequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ===============================
-# NUEVOS ENDPOINTS - CLIPS
-# ===============================
+
 
 @app.post("/ingest/process-with-clips")
 def process_vod_with_clips_endpoint(req: ProcessVODWithClipsRequest):
@@ -198,9 +194,6 @@ def get_clips_preview(job_id: str):
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-# ===============================
-# ENDPOINTS UTILITARIOS
-# ===============================
 
 @app.get("/task/{task_id}")
 def get_task_status(task_id: str):

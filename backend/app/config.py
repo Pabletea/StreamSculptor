@@ -22,12 +22,12 @@ class Config:
     
     @classmethod
     def get_redis_url(cls):
-        """Get formatted Redis URL for Celery"""
+
         return cls.REDIS_URL
     
     @classmethod
     def get_minio_endpoint(cls):
-        """Clean MinIO endpoint (remove protocol if present)"""
+
         endpoint = cls.MINIO_ENDPOINT
         if "://" in endpoint:
             endpoint = endpoint.split("://")[1]

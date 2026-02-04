@@ -7,7 +7,7 @@ class GenerateClipsRequest(BaseModel):
     max_clips: int = 10
     window_size: float = 30.0
     step_size: float = 10.0
-    energy_threshold: float = 0.01  # Umbral mínimo de energía
+    energy_threshold: float = 0.01
 
 class AudioSegmentModel(BaseModel):
     start_time: float

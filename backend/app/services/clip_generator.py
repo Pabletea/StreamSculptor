@@ -11,7 +11,6 @@ import json
 LOG = logging.getLogger(__name__)
 
 class ClipGenerator:
-    """Generador de clips de video usando ffmpeg"""
     
     def __init__(self):
         self.bucket = "vods"
@@ -22,7 +21,7 @@ class ClipGenerator:
         segments: List[AudioSegment], 
         max_clips: int = 10
     ) -> List[Dict]:
-        """Genera clips de video para los segmentos seleccionados"""
+
         
         client = get_minio_client()
         clips_metadata = []
@@ -65,23 +64,23 @@ class ClipGenerator:
         clip_index: int,
         client
     ) -> Dict:
-        """Crea un clip individual usando ffmpeg"""
+
         
         clip_filename = f"clip_{clip_index:02d}.mp4"
         clip_object = f"{job_id}/clips/{clip_filename}"
         
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_clip:
             try:
-                # Comando ffmpeg para extraer clip
+
                 cmd = [
                     "ffmpeg", "-y",
                     "-i", video_path,
-                    "-ss", str(segment.start_time),          # Tiempo de inicio
-                    "-t", str(segment.duration),             # Duración
-                    "-c:v", "libx264",                       # Codec video
-                    "-c:a", "aac",                           # Codec audio
-                    "-preset", "fast",                       # Preset rápido
-                    "-crf", "23",                            # Calidad
+                    "-ss", str(segment.start_time),
+                    "-t", str(segment.duration),
+                    "-c:v", "libx264",
+                    "-c:a", "aac",
+                    "-preset", "fast",
+                    "-crf", "23",
                     temp_clip.name
                 ]
                 
@@ -117,7 +116,7 @@ class ClipGenerator:
                     os.unlink(temp_clip.name)
     
     def save_clips_metadata(self, job_id: str, clips_metadata: List[Dict]):
-        """Guarda metadata de clips en MinIO"""
+
         client = get_minio_client()
         metadata_object = f"{job_id}/clips_metadata.json"
         

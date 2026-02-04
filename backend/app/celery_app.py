@@ -7,7 +7,7 @@ celery = Celery(
     "streamsculptor",
     broker=redis_url,
     backend=redis_url,
-    include=["app.tasks.process_vod"],  # 👈 importa las tareas
+    include=["app.tasks.process_vod"],
 )
 
 celery.conf.task_routes = {
