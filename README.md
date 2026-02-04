@@ -7,27 +7,12 @@ StreamSculptor is a platform that automatically detects the best moments from a 
 <p style="color: red; font-weight: bold;">⚠️ NOTICE: Video processing times are currently longer than desired. We are actively working to reduce them.</p>
 
 
-## Repository Structure
-
-    backend/
-    ├── app/
-    │   ├── services/
-    │   │   └── minio_client.py
-    │   ├── tasks/
-    │   │   └── process_vod.py
-    │   ├── celery_app.py
-    │   └── main.py
-    ├── Dockerfile
-    ├── requirements.txt
-    ├── .gitignore
-    ├── docker-compose.yml
-    └── README.md
 
 ## Local Setup
 
 1. Clone the repository:
 ```bash
-    git clone <repo_url>
+    git clone https://github.com/Pabletea/StreamSculptor.git
     cd StreamSculptor
 ```
 2. Start services with Docker Compose:
