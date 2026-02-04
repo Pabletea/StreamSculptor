@@ -4,7 +4,7 @@
 StreamSculptor is a platform that automatically detects the best moments from a VOD, generates short clips optimized for social media, creates SEO-friendly titles and descriptions, generates AI-stylized thumbnails, subtitles/translates clips, and provides a dashboard for review and publishing.
 
 
-<p style="color: red; font-weight: bold;">⚠️ NOTICE: Video processing times are currently longer than desired. Actively working to reduce them.</p>
+⚠️ NOTICE: Video processing times are currently longer than desired. Actively working to reduce them.</p>
 
 
 
