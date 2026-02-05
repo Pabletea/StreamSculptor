@@ -10,7 +10,7 @@ StreamSculptor is a platform that automatically detects the best moments from a 
 
 ## Local Setup
 
-1. Clone the repository:
+1. Clone the repository
 
 2. Start services with Docker Compose:
 ```bash
