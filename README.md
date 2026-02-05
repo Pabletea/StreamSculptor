@@ -41,7 +41,7 @@ StreamSculptor is a platform that automatically detects the best moments from a 
 
 ## Roadmap & Future Features
 
-- [ ] Overlaying subtitles irl on generated clips
+- [ ] Overlaying subtitles on generated clips
 - [ ] Thumbnail generation
 - [ ] Custom ML models trainable per content type (gaming, podcasts, tutorials, etc.)
 - [ ] Reduce video processing times through pipeline optimization
