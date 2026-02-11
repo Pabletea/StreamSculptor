@@ -1,9 +1,10 @@
+import os
 import requests
 import logging
 
 LOG = logging.getLogger(__name__)
 
-WHISPER_URL = "http://whisper:5000"  # Base URL del servicio Whisper
+WHISPER_URL = os.environ.get("WHISPER_URL", "http://whisper:5000")  # Base URL del servicio Whisper
 
 def transcribe_audio(file_path: str):
     """Envía el archivo de audio al servicio Whisper y devuelve la transcripción."""
