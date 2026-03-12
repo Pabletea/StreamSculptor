@@ -67,7 +67,6 @@ def transcribe_from_minio_endpoint(req: TranscribeMinIORequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
 @app.post("/ingest/process-with-clips")
 def process_vod_with_clips_endpoint(req: ProcessVODWithClipsRequest):
     """Pipeline completo: descarga + transcribe + análisis + clips"""
